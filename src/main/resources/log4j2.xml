@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <!-- CONSOLE -->
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}#%M:%L - %msg%n"/>
+        </Console>
+
+        <File name="app" fileName="cardManagement.log"
+                     filePattern="cardManagement-%d{yyyy-MM-dd-HH}-%i.log.gz">
+            <PatternLayout>
+                <Pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}#%M:%L - %msg%n</Pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <!-- ROOT -->
+        <Root level="info" additivity="true">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="app"/>
+        </Root>
+    </Loggers>
+</Configuration>
