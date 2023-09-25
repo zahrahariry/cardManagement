@@ -28,4 +28,9 @@ public class CardController {
     public ResponseEntity getCardsByNationalId (@PathVariable(name = "nationalId") String nationalId) {
         return cardService.getCardsByNationalId(nationalId);
     }
+
+    @GetMapping(value = "/get-all-cards")
+    public ResponseEntity getAllCardInfos () {
+        return cardService.getAllCardsInfos();
+    }
 }

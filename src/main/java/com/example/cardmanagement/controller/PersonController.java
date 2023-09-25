@@ -25,4 +25,9 @@ public class PersonController {
     public ResponseEntity getPersonByPersonNationalId (@PathVariable(name = "nationalId") String nationalId) {
         return personService.getPersonByPersonNationalId(nationalId);
     }
+
+    @GetMapping(value = "/get-all-persons")
+    public ResponseEntity getAllPersonsInfos (){
+        return personService.getAllPersonsInfos();
+    }
 }

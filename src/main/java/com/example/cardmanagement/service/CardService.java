@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,9 +30,26 @@ public class CardService {
     @Autowired
     PersonService personService;
 
+    public void saveCardForPerson (Card card, Long personId) {
+        Person person = personService.getPersonById(personId);
+        if (person == null) {
+            log.error("person with id : {} dose not exists !!!", personId);
+            throw new PersonNotFoundException();
+        }else {
+            card.setPerson(person);
+            cardRepository.saveAndFlush(card);
+        }
+    }
+
     public void saveCardForPerson (CardModel cardModel) {
-        cardRepository.save(cardMapper.convertCardModelToEntity(cardModel));
+        Card card = cardMapper.convertCardModelToEntity(cardModel);
+        card.setPerson(personService.getPersonById(cardModel.getPersonId()));
+        cardRepository.save(card);
         log.info("card has been saved for person id : {}", cardModel.getPersonId());
+    }
+
+    public Long saveCard (Card card) {
+        return cardRepository.save(card).getId();
     }
 
     public ResponseEntity saveCard (CardModel cardModel) {
@@ -53,7 +71,13 @@ public class CardService {
 
     public ResponseEntity getCardsByPersonId (Long personId) {
         List<Card> cards = cardRepository.findCardsByPersonId(personId);
-        return new ResponseEntity(cardMapper.convertCardEntityListToModelList(cards), HttpStatus.OK);
+        List<CardModel> cardModels = new ArrayList<>();
+        cards.forEach(card -> {
+            CardModel cardModel = cardMapper.convertCardEntityToModel(card);
+            cardModel.setPersonId(card.getPerson().getId());
+            cardModels.add(cardModel);
+        });
+        return new ResponseEntity(cardModels, HttpStatus.OK);
     }
 
     public ResponseEntity getCardsByNationalId (String nationalId) {
@@ -62,7 +86,29 @@ public class CardService {
             log.info("person with national id : {} not found", nationalId);
             throw new PersonNotFoundException();
         }else {
-            return new ResponseEntity(cardMapper.convertCardEntityListToModelList(cardRepository.findCardsByPerson(person)), HttpStatus.OK);
+            List<Card> allCards = cardRepository.findCardsByPerson(person);
+            List<CardModel> cardModels = new ArrayList<>();
+            allCards.forEach(card -> {
+                CardModel cardModel = cardMapper.convertCardEntityToModel(card);
+                cardModel.setPersonId(card.getPerson().getId());
+                cardModels.add(cardModel);
+            });
+            return new ResponseEntity(cardModels, HttpStatus.OK);
         }
+    }
+
+    public ResponseEntity getAllCardsInfos () {
+        List<Card> allCards = cardRepository.findAll();
+        List<CardModel> cardModels = new ArrayList<>();
+        allCards.forEach(card -> {
+            CardModel cardModel = cardMapper.convertCardEntityToModel(card);
+            cardModel.setPersonId(card.getPerson().getId());
+            cardModels.add(cardModel);
+        });
+        return new ResponseEntity(cardModels, HttpStatus.OK);
+    }
+
+    public void deleteAllCardsInDB (){
+        cardRepository.deleteAll();
     }
 }
